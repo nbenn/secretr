@@ -1,9 +1,22 @@
 Package: secretr
-Title: What the Package Does (one line, title case)
+Title: Secure storage of user credentials
+Description: Using password protected services from R either requires repeated
+    manual entry of user credentials which is cumbersome and precludes
+    non-interactive application, or might often rely on insecure workarounds,
+    such as plain-text storage. This package attempts to remedy this situation
+    through use of OS services such as keychain on Mac OS X, or Gnome Seahorse
+    on compatible Linux distributions.
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-Depends: R (>= 3.3.0)
-License: What license is it under?
+Authors@R: person("Nicolas", "Bennett",
+    email = "nicolas.bennett@stat.math.ethz.ch", role = c("aut", "cre"))
+URL: https://github.com/nbenn/secretr
+BugReports: https://github.com/nbenn/secretr/issues
+Depends:
+    R (>= 3.0.0)
+Suggests:
+    testthat,
+    openssl
+RoxygenNote: 5.0.1
+License: GPL-3 | file LICENSE
 Encoding: UTF-8
 LazyData: true
