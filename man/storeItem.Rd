@@ -4,10 +4,12 @@
 \alias{storeItem}
 \title{Store a credential item}
 \usage{
-storeItem(item)
+storeItem(item, vault)
 }
 \arguments{
 \item{item}{A credential item to be stored.}
+
+\item{vault}{A string indicating how to store the credential}
 }
 \value{
 NULL (invisibly).

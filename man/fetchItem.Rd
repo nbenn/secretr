@@ -4,10 +4,12 @@
 \alias{fetchItem}
 \title{Fetch a credential item}
 \usage{
-fetchItem(id)
+fetchItem(id, vault = defaultStorageMode())
 }
 \arguments{
 \item{id}{The ID of the requested credential item.}
+
+\item{vault}{A string indicating where the requested credential is stored.}
 }
 \value{
 The requested credential item.

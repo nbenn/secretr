@@ -47,3 +47,125 @@ generatePassword <- function(length = 15, lowercase = TRUE, uppercase = TRUE,
   password <- sample(alphabet, size = length, replace = TRUE)
   return(paste(password, collapse = ""))
 }
+
+#' @title Initialize file-based storage
+#' 
+#' @description In case no OS resource for storing credentials is available/
+#'              implemented, a file-based fall-back is used. Sensitive
+#'              information is encrypted prior to being stored to an .Rsecrets
+#'              file. The key for decryption is either managed by the user
+#'              or written to the user's .Rprofile.
+#'
+#' @param key         Key used for en-/decryption. If not user-supplied (NULL),
+#'                    a new one is generated.
+#' @param secretsPath Path to the .Rsecrets file (default is in user home).
+#' @param profilePath Path to the .Rprofile file (default is in user home).
+#'
+#' @return NULL (invisibly).
+#' 
+initFileBasedStorage <- function (key = NULL,
+                                  secretsPath = file.path("~", ".Rsecrets"),
+                                  profilePath = file.path("~", ".Rprofile")) {
+  # ensure that not secretr options are already set
+  if (!is.null(getOption("secretr.key")) |
+      !is.null(getOption("secretr.path"))) {
+    stop("some or all secretr options already set. cannot init.")
+  }
+  # ensure that the .Rprofile does not contain any secretr info
+  for (p in unique(c(profilePath, file.path("~", ".Rprofile")))) {
+    if (file.exists(p)) {
+      if (any(grepl("secretr\\.(key|path)", readLines(p)))) {
+        stop("some secretr options already in ", p, ". cannot init.")
+      }
+    }
+  }
+  # create the vault file
+  if (file.exists(secretsPath)) {
+    stop("secrets file already exists. cannot init.")
+  } else {
+    saveRDS(list(), secretsPath)
+  }
+  # ensure that the openssl package is available
+  if (!requireNamespace("openssl", quietly = TRUE)) {
+    utils::install.packages("openssl")
+    if (!requireNamespace("openssl", quietly = TRUE)) {
+      stop("could not find or install the package \"openssl\". ",
+           "Please do so manually.")
+    }
+  }
+  # generate key info
+  if (is.null(key)) key <- generatePassword(length = 32, symbols = FALSE)
+  if (!file.exists(profilePath)) file.create(profilePath)
+  # save key info to options
+  options(secretr.key = key, secretr.path = secretsPath)
+  # save key info to .Rprofile or pass responsibility to user
+  if (interactive()) {
+    message("Do you want to store key information in your .Rprofile file? ",
+            "[Y/n]")
+    response <- ""
+    while (!response %in% c("Y", "n")) {
+      response <- readline()
+      if (!response %in% c("Y", "n")) message("[Y/n]")
+    }
+    if (response == "n") {
+      message("store this information somewhere safe:\n  secretr.key = \"",
+              key, "\"")
+      write(paste0("\n#secretr package options\noptions(secretr.path = \"",
+            secretsPath, "\")\n"), file = profilePath, append = TRUE)
+    } else if (response == "Y") {
+      write(paste0("\n#secretr package options\noptions(secretr.key  = \"",
+                   key, "\",\n        secretr.path = \"", secretsPath,
+                   "\")\n"), file = profilePath, append = TRUE)
+    } else stop("unrecognized option.")
+  } else {
+    message("writing key information into ", profilePath,
+            "\n  please remove again if this is considered not secure enough.")
+    write(paste0("\n#secretr package options\noptions(secretr.key  = \"",
+                 key, "\",\n        secretr.path = \"", secretsPath,
+                 "\")\n"), file = profilePath, append = TRUE)
+  }
+  return(invisible(NULL))
+}
+
+#' @title Make file-based storage available
+#' 
+#' @description Ensures that all necessary infomration for file-based storage
+#'              is available (secretr.path and secretr.key). If the
+#'              .Rsecrets file path is not available, file-based storage is
+#'              initialized and if either the key or the iv vector are not
+#'              available, the user is asked for this information.
+#'
+#' @return NULL (invisibly).
+#' 
+fileBasedStorageSession <- function() {
+  if (is.null(getOption("secretr.path"))) initFileBasedStorage()
+  if (is.null(getOption("secretr.key"))) {
+    if (interactive()) {
+      message("please enter the key for secretr: ")
+      options(secretr.key = readline())
+    } else {
+      stop("need the key for secretr.")
+    }
+  }
+  return(invisible(NULL))
+}
+
+#' @title Make file-based storage available
+#' 
+#' @description Ensures that all necessary infomration for file-based storage
+#'              is available (secretr.path and secretr.key). If the
+#'              .Rsecrets file path is not available, file-based storage is
+#'              initialized and if either the key or the iv vector are not
+#'              available, the user is asked for this information.
+#'
+#' @return NULL (invisibly).
+#' 
+defaultStorageMode <- function() {
+  if (Sys.info()["sysname"] == "Darwin" &
+      utils::compareVersion(Sys.info()["release"], "10.0.0") >= 0) {
+    return("keychain")
+  } else return("file")
+}
+
+#' @useDynLib secretr
+NULL

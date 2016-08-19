@@ -50,3 +50,85 @@ getItemId.default <- function(item) {
   stop("function not implemented for objects of class ",
        paste(class(item), collapse = ", "))
 }
+
+#' @title Encrypt a credential item
+#' 
+#' @description Due to insecurity of file based credential storage, the
+#'              sensitive information is encrypted.
+#'
+#' @param item A credential item to be encrypted.
+#'
+#' @return An encrypted credential item.
+#' 
+#' @export
+encryptItem <- function(item) {
+  UseMethod("encryptItem", item)
+}
+#' @export
+encryptItem.LoginItem <- function(item) {
+  if (item$encrypted) {
+    warning("item already encrypted. doing nothing.")
+    return(item)
+  } else {
+    if (!requireNamespace("openssl", quietly = TRUE)) {
+      stop("could not find the package \"openssl\".")
+    }
+    fileBasedStorageSession()
+    secretr_key <- getOption("secretr.key")
+    secretr_key <- charToRaw(secretr_key)
+    secretr_key <- openssl::sha256(secretr_key)
+    if (length(secretr_key) != 32) {
+      stop("cannot perform aes-256 due to key length != 32 bytes")
+    }
+    item$password <- openssl::aes_cbc_encrypt(charToRaw(item$password),
+                                              key = secretr_key)
+    item$encrypted <- TRUE
+    return(item)
+  }
+}
+#' @export
+encryptItem.default <- function(item) {
+  stop("function not implemented for objects of class ",
+       paste(class(item), collapse = ", "))
+}
+
+#' @title Decrypt a credential item
+#' 
+#' @description Due to insecurity of file based credential storage, the
+#'              sensitive information is encrypted.
+#'
+#' @param item A credential item to be decrypted.
+#'
+#' @return A decrypted credential item.
+#' 
+#' @export
+decryptItem <- function(item) {
+  UseMethod("decryptItem", item)
+}
+#' @export
+decryptItem.LoginItem <- function(item) {
+  if (!item$encrypted) {
+    warning("item not encrypted. doing nothing.")
+    return(item)
+  } else {
+    if (!requireNamespace("openssl", quietly = TRUE)) {
+      stop("could not find the package \"openssl\".")
+    }
+    fileBasedStorageSession()
+    secretr_key <- getOption("secretr.key")
+    secretr_key <- charToRaw(secretr_key)
+    secretr_key <- openssl::sha256(secretr_key)
+    if (length(secretr_key) != 32) {
+      stop("cannot perform aes-256 due to key length != 32 bytes")
+    }
+    raw <- openssl::aes_cbc_decrypt(item$password, key = secretr_key)
+    item$password <- rawToChar(raw)
+    item$encrypted <- FALSE
+    return(item)
+  }
+}
+#' @export
+decryptItem.default <- function(item) {
+  stop("function not implemented for objects of class ",
+       paste(class(item), collapse = ", "))
+}

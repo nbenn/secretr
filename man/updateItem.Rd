@@ -4,10 +4,13 @@
 \alias{updateItem}
 \title{Update a credential item}
 \usage{
-updateItem(item)
+updateItem(item, vault)
 }
 \arguments{
 \item{item}{A credential item to be modified.}
+
+\item{vault}{A string indicating how the credential to be modified is
+stored.}
 }
 \value{
 NULL (invisibly).

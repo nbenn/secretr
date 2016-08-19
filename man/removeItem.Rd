@@ -4,10 +4,12 @@
 \alias{removeItem}
 \title{Delete a credential item}
 \usage{
-removeItem(id)
+removeItem(id, vault = defaultStorageMode())
 }
 \arguments{
 \item{id}{The ID of the credential item to be deleted.}
+
+\item{vault}{A string indicating where the requested credential is stored.}
 }
 \value{
 NULL (invisibly).
