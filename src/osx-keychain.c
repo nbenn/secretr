@@ -133,7 +133,7 @@ SEXP storeLoginItemKeychain_(SEXP service_, SEXP username_, SEXP password_) {
     Rf_error("Error determining whether item is already present.");
   }
 
-  status = SecKeychainAddGenericPassword (
+  status = SecKeychainAddGenericPassword(
              NULL,        // default keychain
              strlen(srv), // length of service name
              srv,         // service name
@@ -178,7 +178,7 @@ SEXP updateLoginItemKeychain_(SEXP service_, SEXP username_, SEXP password_) {
     Rf_error("Error determining the associated username.");
   }
 
-  status = SecKeychainFindGenericPassword (
+  status = SecKeychainFindGenericPassword(
              NULL,            // default keychain
              strlen(srv),     // length of service name
              srv,             // service name
@@ -200,7 +200,7 @@ SEXP updateLoginItemKeychain_(SEXP service_, SEXP username_, SEXP password_) {
   attrs[0].data = (void *)new_usr;
   SecKeychainAttributeList attrList = { 1, attrs };
 
-  status = SecKeychainItemModifyContent (
+  status = SecKeychainItemModifyContent(
              item,            // the item reference
              &attrList,       // list of attributes to be modified
              strlen(new_pwd), // length of password
@@ -235,7 +235,7 @@ SEXP fetchLoginItemKeychain_(SEXP service_) {
     Rf_error("Error determining the associated username.");
   }
 
-  status = SecKeychainFindGenericPassword (
+  status = SecKeychainFindGenericPassword(
              NULL,        // default keychain
              strlen(srv), // length of service name
              srv,         // service name
@@ -282,7 +282,7 @@ SEXP removeLoginItemKeychain_(SEXP service_) {
   }
 
   // only retrieve password to make sure the user has access rights
-  status = SecKeychainFindGenericPassword (
+  status = SecKeychainFindGenericPassword(
              NULL,        // default keychain
              strlen(srv), // length of service name
              srv,         // service name

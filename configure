@@ -1,10 +1,9 @@
 #!/bin/bash
 
 rm -f ./src/Makevars
-touch ./src/Makevars
 
 #if mac
-if [[ `uname` -eq Darwin ]] ; then
-  echo "PKG_LIBS=-framework CoreFoundation -framework Security" > \
-    ./src/Makevars
+if [[ `uname` == Darwin ]] ; then
+  touch ./src/Makevars
+  echo "PKG_LIBS=-framework CoreFoundation -framework Security" > ./src/Makevars
 fi
