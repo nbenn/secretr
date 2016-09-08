@@ -161,9 +161,10 @@ fileBasedStorageSession <- function() {
 #' @return NULL (invisibly).
 #' 
 defaultStorageMode <- function() {
-  if (Sys.info()["sysname"] == "Darwin" &
-      utils::compareVersion(Sys.info()["release"], "10.0.0") >= 0) {
-    return("keychain")
+  if (Sys.info()["sysname"] == "Darwin") {
+    if (utils::compareVersion(Sys.info()["release"], "10.0.0") >= 0) {
+      return("keychain")
+    } else return("file")
   } else return("file")
 }
 
