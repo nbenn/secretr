@@ -2,7 +2,7 @@
 
 rm -f ./src/Makevars
 
-#if mac
+#if mac os x
 if [[ `uname` == Darwin ]] ; then
   touch ./src/Makevars
   echo "PKG_LIBS=-framework CoreFoundation -framework Security" > ./src/Makevars

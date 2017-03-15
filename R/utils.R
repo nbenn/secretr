@@ -66,7 +66,7 @@ generatePassword <- function(length = 15, lowercase = TRUE, uppercase = TRUE,
 initFileBasedStorage <- function (key = NULL,
                                   secretsPath = file.path("~", ".Rsecrets"),
                                   profilePath = file.path("~", ".Rprofile")) {
-  # ensure that not secretr options are already set
+  # ensure that no secretr options are already set
   if (!is.null(getOption("secretr.key")) |
       !is.null(getOption("secretr.path"))) {
     stop("some or all secretr options already set. cannot init.")
@@ -100,12 +100,12 @@ initFileBasedStorage <- function (key = NULL,
   options(secretr.key = key, secretr.path = secretsPath)
   # save key info to .Rprofile or pass responsibility to user
   if (interactive()) {
-    message("Do you want to store key information in your .Rprofile file? ",
-            "[Y/n]")
+    message("Do you want to store key information in your .Rprofile file?\n",
+            "[Y/n]: ", appendLF = FALSE)
     response <- ""
     while (!response %in% c("Y", "n")) {
-      response <- readline()
-      if (!response %in% c("Y", "n")) message("[Y/n]")
+      response <- readUserInput()
+      if (!response %in% c("Y", "n")) message("[Y/n]: ", appendLF = FALSE)
     }
     if (response == "n") {
       message("store this information somewhere safe:\n  secretr.key = \"",
@@ -141,8 +141,8 @@ fileBasedStorageSession <- function() {
   if (is.null(getOption("secretr.path"))) initFileBasedStorage()
   if (is.null(getOption("secretr.key"))) {
     if (interactive()) {
-      message("please enter the key for secretr: ")
-      options(secretr.key = readline())
+      message("please enter the key for secretr: ", appendLF = FALSE)
+      options(secretr.key = readUserInput(secret = TRUE))
     } else {
       stop("need the key for secretr.")
     }
@@ -166,6 +166,68 @@ defaultStorageMode <- function() {
       return("keychain")
     } else return("file")
   } else return("file")
+}
+
+#' @title Item getter/setter depending on item existence
+#' 
+#' @description Depending on whether the requested credential item is available
+#'              it is either fetched or created and returned.
+#'
+#' @return A credential item, such as a LoginItem.
+#' 
+#' @export
+getSetItem <- function(service_name, credential_type = "LoginItem") {
+  credentials <- tryCatch({
+    result <- fetchItem(service_name)
+  }, error = function(e) {
+    if (as.character(e$message) == "Did not find 1, but 0 matches.") {
+      if (interactive()) {
+        constructor <- get(credential_type)
+        args <- formals(constructor)
+        for (arg in names(args)) {
+          if (arg == "service") args[[arg]] <- service_name
+          else if (is.null(args[[arg]]) || args[[arg]] != "") {
+            message("Please enter your ", service_name, " ", arg,
+                    " or press enter for default (",
+                    ifelse(is.null(args[[arg]]), "NULL", args[[arg]]), "):")
+            tmp <- readUserInput(secret = isTRUE(arg == "password"))
+            if (tmp != "") args[[arg]] <- tmp
+          } else {
+            message("Please enter your ", service_name, " ", arg, ": ", 
+                    appendLF = FALSE)
+            args[[arg]] <- readUserInput(secret = isTRUE(arg == "password"))
+          }
+        }
+        cred <- do.call(constructor, args, quote = TRUE)
+        storeItem(cred)
+        return(cred)
+      } else {
+        stop("Please enter your ", service_name, " credentials in an ",
+             "interactive session\n  or make sure they're stored beforehand.")
+      }
+    } else stop(e$message)
+  })
+  return(credentials)
+}
+
+#' @title A wrapper around readline that supports masking
+#' 
+#' @description In case the user enters sensitive information such as a
+#'              password, this function tries to mask the input by calling
+#'              getPass of the eponymous package if it can be made available.
+#'
+#' @return The string entered by the user.
+#' 
+readUserInput <- function(secret = FALSE, prefix = "") {
+  if (secret) {
+    readFun <- getPass::getPass
+    # check if getPass package can be made available
+    if (!requireNamespace("getPass", quietly = TRUE)) {
+      utils::install.packages("getPass")
+      if (!requireNamespace("getPass", quietly = TRUE)) readFun <- readline
+    }
+  } else readFun <- readline
+  return(do.call(readFun, list(prefix)))
 }
 
 #' @useDynLib secretr
