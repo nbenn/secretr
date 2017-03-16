@@ -14,4 +14,3 @@ In case the user enters sensitive information such as a
              password, this function tries to mask the input by calling
              getPass of the eponymous package if it can be made available.
 }
-

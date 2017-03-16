@@ -21,4 +21,3 @@ In order to store credential items, OS resources (such as the
              sensitive information and saves the key to the user's
              .Rprofile.
 }
-

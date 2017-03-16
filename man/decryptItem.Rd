@@ -16,4 +16,3 @@ A decrypted credential item.
 Due to insecurity of file based credential storage, the
              sensitive information is encrypted.
 }
-

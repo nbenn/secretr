@@ -17,4 +17,3 @@ NULL (invisibly).
 \description{
 Remove a credential item from secure storage.
 }
-

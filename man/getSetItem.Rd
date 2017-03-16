@@ -13,4 +13,3 @@ A credential item, such as a LoginItem.
 Depending on whether the requested credential item is available
              it is either fetched or created and returned.
 }
-

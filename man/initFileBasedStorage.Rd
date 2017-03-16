@@ -25,4 +25,3 @@ In case no OS resource for storing credentials is available/
              file. The key for decryption is either managed by the user
              or written to the user's .Rprofile.
 }
-

@@ -19,4 +19,3 @@ NULL (invisibly).
 In case an already existing credential item changes, this
              function may be used to modify its stored representation.
 }
-

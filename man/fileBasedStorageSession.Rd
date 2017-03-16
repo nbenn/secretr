@@ -16,4 +16,3 @@ Ensures that all necessary infomration for file-based storage
              initialized and if either the key or the iv vector are not
              available, the user is asked for this information.
 }
-

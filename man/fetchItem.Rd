@@ -17,4 +17,3 @@ The requested credential item.
 \description{
 Fetches a credential item from secure storage.
 }
-

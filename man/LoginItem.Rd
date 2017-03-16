@@ -23,4 +23,3 @@ A LoginItem object is created from a service name (which
              (optionally) a password. If the password is not supplied, a
              new one is generated using generatePassword.
 }
-

@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 *.sublime-*
+src/*.o
+src/*.so
