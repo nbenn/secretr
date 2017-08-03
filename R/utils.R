@@ -220,12 +220,12 @@ getSetItem <- function(service_name, credential_type = "LoginItem") {
 #' 
 readUserInput <- function(secret = FALSE, prefix = "") {
   if (secret) {
-    readFun <- getPass::getPass
     # check if getPass package can be made available
     if (!requireNamespace("getPass", quietly = TRUE)) {
       utils::install.packages("getPass")
       if (!requireNamespace("getPass", quietly = TRUE)) readFun <- readline
-    }
+      else readFun <- getPass::getPass
+    } else readFun <- getPass::getPass
   } else readFun <- readline
   return(do.call(readFun, list(prefix)))
 }
